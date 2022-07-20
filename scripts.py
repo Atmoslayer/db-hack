@@ -35,7 +35,7 @@ def remove_chastisements(schoolkid_name):
     child_chastisements.delete()
 
 
-def create_commendation(schoolkid_name, subject):
+def create_commendation(schoolkid_name, subject_title):
     schoolkid = get_schoolkid_by_name(schoolkid_name)
     сommendations = ['Молодец!', 'Отлично, как всегда!',
                     'Уже существенно лучше!', 'Это как раз то, что нужно',
@@ -44,10 +44,7 @@ def create_commendation(schoolkid_name, subject):
     year_of_study = schoolkid.year_of_study
     group_letter = schoolkid.group_letter
     try:
-        subject_object = Subject.objects.filter(title=subject, year_of_study=year_of_study)
-        if not subject_object:
-            raise ObjectDoesNotExist
-        subject = subject_object[0]
+        subject = Subject.objects.get(title=subject_title, year_of_study=year_of_study)
         subject_lessons = Lesson.objects.filter(year_of_study=year_of_study, group_letter=group_letter,
                                                 subject=subject)
         last_lesson = subject_lessons.order_by('date').last()
@@ -55,4 +52,6 @@ def create_commendation(schoolkid_name, subject):
         Commendation.objects.create(text=сommendation_text, created=last_lesson.date, schoolkid=schoolkid,
                                     subject=subject, teacher=last_lesson.teacher)
     except ObjectDoesNotExist:
-        print(f'No subject found')
+        print('Предмет не найдет')
+    except MultipleObjectsReturned:
+        print('Несколько предметов найдено, уточните название')
